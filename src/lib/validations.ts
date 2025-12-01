@@ -21,8 +21,8 @@ export const registerSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       'Password must contain uppercase, lowercase, number, and special character'
     ),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
+  firstName: z.string().optional().or(z.literal('')),
+  lastName: z.string().optional().or(z.literal('')), 
 });
 
 // Login validation schema

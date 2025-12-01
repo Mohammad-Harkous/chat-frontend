@@ -26,41 +26,45 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
- const onSubmit = (data: RegisterFormData) => {
-    setServerError('');
-    
-    register(data, {
-      onSuccess: (response) => {
-        // Show success toast
-        toast.success(`Welcome, ${response.user.username}! 🎉`);
-        
-        // Invalidate current user query to refetch
-        queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-        
-        // Redirect to home/chat
-        navigate('/');
-      },
-      onError: (error) => {
-        // Handle different error types
-        if (error.response?.data) {
-          const message = (error.response.data as { message?: string | string[] }).message;
-          if (Array.isArray(message)) {
-            setServerError(message.join(', '));
-            toast.error('Registration failed');
-          } else if (typeof message === 'string') {
-            setServerError(message);
-            toast.error(message);
-          } else {
-            setServerError('Registration failed. Please try again.');
-            toast.error('Registration failed. Please try again.');
-          }
-        } else {
-          setServerError('Network error. Please check your connection.');
-          toast.error('Network error. Please check your connection.');
-        }
-      },
-    });
+const onSubmit = (data: RegisterFormData) => {
+  setServerError('');
+  
+  // Remove empty strings (send undefined instead)
+  const cleanData = {
+    email: data.email,
+    username: data.username,
+    password: data.password,
+    // Only include firstName/lastName if they have values
+    ...(data.firstName && data.firstName.trim() !== '' && { firstName: data.firstName }),
+    ...(data.lastName && data.lastName.trim() !== '' && { lastName: data.lastName }),
   };
+  
+  register(cleanData, {
+    onSuccess: (response) => {
+      toast.success(`Welcome, ${response.user.username}! 🎉`);
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      navigate('/');
+    },
+    onError: (error) => {
+      if (error.response?.data) {
+        const message = (error.response.data as { message?: string | string[] }).message;
+        if (Array.isArray(message)) {
+          setServerError(message.join(', '));
+          toast.error('Registration failed');
+        } else if (typeof message === 'string') {
+          setServerError(message);
+          toast.error(message);
+        } else {
+          setServerError('Registration failed. Please try again.');
+          toast.error('Registration failed. Please try again.');
+        }
+      } else {
+        setServerError('Network error. Please check your connection.');
+        toast.error('Network error. Please check your connection.');
+      }
+    },
+  });
+};
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
