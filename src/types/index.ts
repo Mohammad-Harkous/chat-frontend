@@ -37,3 +37,48 @@ export interface ApiError {
   statusCode: number;
   error: string;
 }
+
+// Friend Request types 
+export const FriendRequestStatus = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+  IGNORED: 'ignored',
+} as const;
+
+export type FriendRequestStatus = typeof FriendRequestStatus[keyof typeof FriendRequestStatus];
+
+export interface FriendRequest {
+  id: string;
+  sender: User;
+  receiver: User;
+  status: FriendRequestStatus;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface SendFriendRequestData {
+  receiverId: string;
+}
+
+export interface RespondFriendRequestData {
+  action: 'accept' | 'reject' | 'ignore';
+}
+
+// API Responses
+export interface SendFriendRequestResponse {
+  message: string;
+  request: FriendRequest;
+}
+
+export interface RespondFriendRequestResponse {
+  message: string;
+  request: FriendRequest;
+}
+
+// API Error type
+export interface ApiError {
+  message: string | string[];
+  statusCode: number;
+  error: string;
+}

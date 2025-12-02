@@ -6,8 +6,12 @@ import { queryClient } from './lib/queryClient';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import HomePage from './pages/HomePage';
+import SearchUsersPage from './pages/friends/SearchUsersPage';
+import FriendRequestsPage from './pages/friends/FriendRequestsPage';
+import FriendsListPage from './pages/friends/FriendsListPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import GuestRoute from './components/common/GuestRoute'; // ← Add this
+import GuestRoute from './components/common/GuestRoute';
+import Navbar from './components/layout/Navbar';
 
 function App() {
   return (
@@ -37,7 +41,43 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <>
+                  <Navbar />
+                  <HomePage />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/friends/search"
+            element={
+              <ProtectedRoute>
+                <>
+                  <Navbar />
+                  <SearchUsersPage />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/friends/requests"
+            element={
+              <ProtectedRoute>
+                <>
+                  <Navbar />
+                  <FriendRequestsPage />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/friends"
+            element={
+              <ProtectedRoute>
+                <>
+                  <Navbar />
+                  <FriendsListPage />
+                </>
               </ProtectedRoute>
             }
           />
@@ -50,7 +90,7 @@ function App() {
         <Toaster position="top-right" richColors />
       </BrowserRouter>
 
-      {/* React Query Devtools (only in development) */}
+      {/* React Query Devtools */}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
