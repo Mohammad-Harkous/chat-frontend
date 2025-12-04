@@ -1,12 +1,12 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '@/hooks/queries/useCurrentUser';
 import { usePendingRequests } from '@/hooks/queries/usePendingRequests';
 import { useLogout } from '@/hooks/mutations/useLogout';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Home, Search, UserPlus, Users, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import WebSocketStatus from '@/components/common/WebSocketStatus';
 
 export default function Navbar() {
   const location = useLocation();
@@ -19,7 +19,14 @@ export default function Navbar() {
     logout(undefined, {
       onSuccess: () => {
         toast.success('Logged out successfully');
-        navigate('/login');
+        
+        // Small delay to ensure socket disconnects before redirect
+        setTimeout(() => {
+          navigate('/login');
+        }, 100);
+      },
+      onError: () => {
+        toast.error('Logout failed. Please try again.');
       },
     });
   };
@@ -78,6 +85,7 @@ export default function Navbar() {
 
           {/* User Menu */}
           <div className="flex items-center gap-4">
+            <WebSocketStatus />
             <span className="text-sm text-gray-600">
               {currentUserData?.user.username}
             </span>
@@ -87,8 +95,17 @@ export default function Navbar() {
               variant="outline"
               size="sm"
             >
-              <LogOut size={16} className="mr-2" />
-              Logout
+              {isPending ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Logging out...
+                </>
+              ) : (
+                <>
+                  <LogOut size={16} className="mr-2" />
+                  Logout
+                </>
+              )}
             </Button>
           </div>
         </div>
