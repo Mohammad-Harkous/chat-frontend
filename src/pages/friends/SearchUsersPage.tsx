@@ -27,7 +27,7 @@ export default function SearchUsersPage() {
     return friends?.some((friend) => friend.id === userId);
   };
 
-  // Check if request already sent
+  // Check if request already sent (and still pending)
   const hasSentRequest = (userId: string) => {
     return sentRequests?.some((req) => req.receiver.id === userId);
   };
@@ -105,9 +105,13 @@ export default function SearchUsersPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-semibold">{user.username}</p>
-                          {user.isOnline && (
+                          {user.isOnline ? (
                             <Badge variant="secondary" className="bg-green-100 text-green-800">
                               Online
+                            </Badge>
+                          ):(
+                            <Badge variant="secondary" className="bg-red-100 text-red-500">
+                              Offline
                             </Badge>
                           )}
                         </div>

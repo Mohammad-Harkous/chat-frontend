@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true, // ← CRITICAL! Sends cookies with requests
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -49,12 +49,10 @@ api.interceptors.response.use(
 
     console.error('❌ API Error:', error.response?.status, error.config?.url);
 
-    // If request is to /auth/refresh and it fails, logout immediately
-    if (originalRequest.url === '/auth/refresh') {
-      console.error('❌ Refresh token invalid, logging out...');
-      isRefreshing = false;
-      processQueue(error);
-      window.location.href = '/login';
+    // Don't try to refresh on these endpoints
+    const noRefreshEndpoints = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/me'];
+    if (noRefreshEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))) {
+      console.log('⏸️ Skipping refresh for auth endpoint');
       return Promise.reject(error);
     }
 
@@ -82,24 +80,17 @@ api.interceptors.response.use(
     try {
       console.log('🔄 Refreshing access token...');
       
-      // Call refresh endpoint
       await api.post('/auth/refresh');
       
       console.log('✅ Token refreshed successfully');
       
-      // Process all queued requests
       processQueue(null);
       
-      // Retry the original request
       return api(originalRequest);
     } catch (refreshError) {
       console.error('❌ Token refresh failed');
       
-      // Refresh failed, process queue with error
       processQueue(refreshError as Error);
-      
-      // Redirect to login (token refresh failed)
-      window.location.href = '/login';
       
       return Promise.reject(refreshError);
     } finally {

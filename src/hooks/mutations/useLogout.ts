@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
+import { useSocket } from '@/contexts/SocketContext';
 
 interface LogoutResponse {
   message: string;
@@ -8,6 +9,7 @@ interface LogoutResponse {
 
 export const useLogout = () => {
   const queryClient = useQueryClient();
+   const { disconnect } = useSocket();
 
   return useMutation<LogoutResponse, AxiosError>({
     mutationFn: async () => {
@@ -15,7 +17,10 @@ export const useLogout = () => {
       return response.data;
     },
     onSuccess: () => {
-      // Clear all queries when user logs out
+      // Disconnect socket
+      disconnect();
+      
+      // Clear all cached data
       queryClient.clear();
     },
   });

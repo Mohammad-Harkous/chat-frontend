@@ -15,7 +15,7 @@ import Navbar from './components/layout/Navbar';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+
       <BrowserRouter>
         <Routes>
           {/* Guest routes (only for non-authenticated users) */}
@@ -88,11 +88,10 @@ function App() {
 
         {/* Toast Notifications */}
         <Toaster position="top-right" richColors />
-      </BrowserRouter>
 
-      {/* React Query Devtools */}
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+        {/* React Query Devtools */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </BrowserRouter>
   );
 }
 

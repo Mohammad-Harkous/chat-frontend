@@ -1,3 +1,4 @@
+import { useSocket } from '@/contexts/SocketContext';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +18,7 @@ export default function RegisterPage() {
   const queryClient = useQueryClient();
   const { mutate: register, isPending } = useRegister();
   const [serverError, setServerError] = useState<string>('');
+  const { connect } = useSocket();
 
   const {
     register: registerField,
@@ -43,6 +45,7 @@ const onSubmit = (data: RegisterFormData) => {
     onSuccess: (response) => {
       toast.success(`Welcome, ${response.user.username}! 🎉`);
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      
       navigate('/');
     },
     onError: (error) => {
