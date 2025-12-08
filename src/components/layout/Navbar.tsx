@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '@/hooks/queries/useCurrentUser';
 import { usePendingRequests } from '@/hooks/queries/usePendingRequests';
+import { useUnreadCounts } from '@/hooks/queries/useUnreadCounts';
 import { useLogout } from '@/hooks/mutations/useLogout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, Search, UserPlus, Users, LogOut } from 'lucide-react';
+import { Home, Search, UserPlus, MessageCircle, Users, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import WebSocketStatus from '@/components/common/WebSocketStatus';
 
@@ -13,6 +14,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { data: currentUserData } = useCurrentUser();
   const { data: pendingRequests } = usePendingRequests();
+  const { data: unreadCounts } = useUnreadCounts();
   const { mutate: logout, isPending } = useLogout();
 
   const handleLogout = () => {
@@ -35,6 +37,12 @@ export default function Navbar() {
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
+    { 
+      path: '/conversations', 
+      icon: MessageCircle, 
+      label: 'Messages',
+      badge: unreadCounts?.total || 0,
+    },
     { path: '/friends/search', icon: Search, label: 'Find Friends' },
     { 
       path: '/friends/requests', 
