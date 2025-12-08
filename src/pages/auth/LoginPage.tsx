@@ -12,12 +12,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useSocket } from '@/contexts/SocketContext';
+import { requestNotificationPermission } from '@/lib/notifications';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutate: login, isPending } = useLogin();
-    const { connect } = useSocket(); 
+  const { connect } = useSocket(); 
   const [serverError, setServerError] = useState<string>('');
 
   const {
@@ -32,12 +33,15 @@ export default function LoginPage() {
     setServerError('');
     
     login(data, {
-      onSuccess: (response) => {
+      onSuccess: async(response) => {
       // Show success toast
       toast.success(`Welcome back, ${response.user.username}! 👋`);
       
       // Invalidate current user query to refetch
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+
+      // Request notification permission
+        await requestNotificationPermission();
       
       // Redirect to home/chat
       navigate('/');

@@ -8,7 +8,7 @@ export interface User {
   avatarUrl?: string;
   bio?: string;
   isOnline: boolean;
-  lastSeen: Date | string;
+  lastSeen?: string; 
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -81,4 +81,32 @@ export interface ApiError {
   message: string | string[];
   statusCode: number;
   error: string;
+}
+
+// Conversation & Message types
+export interface Conversation {
+  id: string;
+  participant1: User;
+  participant2: User;
+  lastMessageAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Message {
+  id: string;
+  conversation: Conversation;
+  sender: User;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface SendMessageData {
+  conversationId: string;
+  content: string;
+}
+
+export interface CreateConversationData {
+  participantId: string;
 }
