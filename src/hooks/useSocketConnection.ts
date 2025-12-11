@@ -21,7 +21,22 @@ export const useSocketConnection = () => {
 
     console.log('🔌 Setting up global socket listeners');
 
-    // ===== USER STATUS CHANGED ===== (NEW!)
+      // ✅ Refetch current user after socket connects
+      const handleConnect = () => {
+      console.log('✅ Socket connected - refetching current user');
+      
+      // ✅ No setTimeout needed - backend sets online status in JWT strategy
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      };
+
+    socket.on('connect', handleConnect);
+
+    // Call immediately if already connected  
+    if (socket.connected) {
+      handleConnect();
+    }
+
+    // ===== USER STATUS CHANGED =====
     socket.on('userStatusChanged', (data: { userId: string; isOnline: boolean }) => {
       console.log('👤 [Global] User status changed:', data.userId.substring(0, 8), data.isOnline ? 'online' : 'offline');
       
@@ -40,20 +55,20 @@ export const useSocketConnection = () => {
       queryClient.setQueryData<any[]>(['conversations'], (old) => {
         if (!old) return old;
         
-        return old.map((conv) => {
-          if (conv.participant1.id === data.userId) {
+        return old.map((conversation) => {
+          if (conversation.participant1.id === data.userId) {
             return {
-              ...conv,
-              participant1: { ...conv.participant1, isOnline: data.isOnline },
+              ...conversation,
+              participant1: { ...conversation.participant1, isOnline: data.isOnline },
             };
           }
-          if (conv.participant2.id === data.userId) {
+          if (conversation.participant2.id === data.userId) {
             return {
-              ...conv,
-              participant2: { ...conv.participant2, isOnline: data.isOnline },
+              ...conversation,
+              participant2: { ...conversation.participant2, isOnline: data.isOnline },
             };
           }
-          return conv;
+          return conversation;
         });
       });
     });
@@ -81,6 +96,21 @@ export const useSocketConnection = () => {
       });
     });
 
+    // ===== CONVERSATION CREATED =====
+    socket.on('conversationCreated', (data: { conversationId: string }) => {
+      console.log('💬 [Global] New conversation created:', data.conversationId.substring(0, 8));
+      
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['messages', data.conversationId] });
+    });
+
+    // ===== CONVERSATION RESTORED =====
+    socket.on('conversationRestored', (data: { conversationId: string }) => {
+      console.log('♻️ [Global] Conversation restored:', data.conversationId.substring(0, 8));
+      
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['messages', data.conversationId] });
+    });
     
     // ===== MESSAGE RECEIVED =====
     socket.on('messageReceived', (data: { message: Message }) => {
@@ -143,12 +173,26 @@ export const useSocketConnection = () => {
       }
     });
 
+    // ===== FRIEND REMOVED =====
+    socket.on('friendRemoved', (data: { userId: string }) => {
+      console.log('👋 [Global] Friend removed:', data.userId.substring(0, 8));
+      
+      queryClient.setQueryData<any[]>(['friends'], (old) => {
+        if (!old) return old;
+        return old.filter((friend) => friend.id !== data.userId);
+      });
+    });
+
     return () => {
       console.log('🔇 Removing global socket listeners');
+      socket.off('connect', handleConnect);
       socket.off('userStatusChanged');
       socket.off('friendRequestReceived');
       socket.off('friendRequestAccepted');
+      socket.off('conversationCreated');
+      socket.off('conversationRestored');
       socket.off('messageReceived');
+      socket.off('friendRemoved');
     };
   }, [socket, queryClient, location.pathname]);
 };

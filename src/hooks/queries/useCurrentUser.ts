@@ -15,6 +15,5 @@ export const useCurrentUser = () => {
       return response.data;
     },
     retry: false, // Don't retry if 401 (not authenticated)
-    staleTime: Infinity, // Current user data doesn't go stale
   });
 };
