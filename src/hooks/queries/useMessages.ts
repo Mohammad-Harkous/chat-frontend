@@ -10,6 +10,14 @@ export const useMessages = (conversationId: string) => {
       const response = await api.get<Message[]>(
         `/conversations/${conversationId}/messages`
       );
+
+        console.log('📨 Messages fetched:', response.data.map(m => ({
+        id: m.id.substring(0, 8),
+        content: m.content.substring(0, 20),
+        isRead: m.isRead,
+        sender: m.sender.id.substring(0, 8),
+      })));
+      
       return response.data;
     },
     enabled: !!conversationId, // Only fetch if conversationId exists

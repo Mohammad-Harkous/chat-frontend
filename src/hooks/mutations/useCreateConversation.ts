@@ -14,24 +14,24 @@ export const useCreateConversation = () => {
     onSuccess: (newConversation) => {
       console.log('✅ Conversation created/restored:', newConversation.id);
       
-      // Add to conversations cache immediately
+      // Add to conversations cache
       queryClient.setQueryData<Conversation[]>(['conversations'], (old) => {
         if (!old) return [newConversation];
         
-        // Check if already exists (might be restored)
         const exists = old.some(conv => conv.id === newConversation.id);
         if (exists) {
-          // Update existing
           return old.map(conv => 
             conv.id === newConversation.id ? newConversation : conv
           );
         }
         
-        // Add new
         return [newConversation, ...old];
       });
 
-      // Also invalidate to ensure fresh data
+      // Clear messages cache for this conversation (force fresh fetch)
+      queryClient.removeQueries({ queryKey: ['messages', newConversation.id] });
+
+      // Invalidate conversations
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
