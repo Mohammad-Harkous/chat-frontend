@@ -11,14 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useSocket } from '@/contexts/SocketContext';
 import { requestNotificationPermission } from '@/lib/notifications';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutate: login, isPending } = useLogin();
-  const { connect } = useSocket(); 
   const [serverError, setServerError] = useState<string>('');
 
   const {
