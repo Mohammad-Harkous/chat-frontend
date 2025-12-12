@@ -1,21 +1,26 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route} from 'react-router-dom';
+import { lazy, Suspense } from 'react'; 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'sonner';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import HomePage from './pages/HomePage';
-import SearchUsersPage from './pages/friends/SearchUsersPage';
-import FriendRequestsPage from './pages/friends/FriendRequestsPage';
-import FriendsListPage from './pages/friends/FriendsListPage';
-import ConversationsListPage from './pages/conversations/ConversationsListPage';
-import ChatPage from './pages/conversations/ChatPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import GuestRoute from './components/common/GuestRoute';
 import Navbar from './components/layout/Navbar';
+import PageLoader from './components/common/PageLoader';
+
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const HomePage = lazy(() => import('./pages/HomePage'));
+const SearchUsersPage = lazy(() => import('./pages/friends/SearchUsersPage'));
+const FriendRequestsPage = lazy(() => import('./pages/friends/FriendRequestsPage'));
+const FriendsListPage = lazy(() => import('./pages/friends/FriendsListPage'));
+const ConversationsListPage = lazy(() => import('./pages/conversations/ConversationsListPage'));
+const ChatPage = lazy(() => import('./pages/conversations/ChatPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function App() {
   return (
     <BrowserRouter>
+    <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Guest routes */}
         <Route
@@ -102,9 +107,10 @@ function App() {
           }
         />
 
-        {/* Catch all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/*  404 Page - Must be last */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
+    </Suspense>
 
       <Toaster position="top-right" richColors />
       <ReactQueryDevtools initialIsOpen={false} />
